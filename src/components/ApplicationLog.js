@@ -3,15 +3,13 @@ import styles from "../assets/Styles.module.css";
 import Header from "./Header.js";
 import AddButtonNavigationBar from "./AddButtonNavbar.js";
 import axios from "axios";
-import SingleApplication from "./SingleApplication";
-import { Link } from "react-router-dom";
-import ReactDOM from "react-dom";
-import { BrowserRouter } from "react-router-dom";
+import Box from "@material-ui/core/Box";
 
 // defines the space that contains the three columns of applications
+
 class ApplicationLog extends React.Component {
   state = {
-    userID: 0,
+    userEmail: "",
     applicationsToDo: [],
     applicationsInProgress: [],
     applicationsCompleted: [],
@@ -19,22 +17,24 @@ class ApplicationLog extends React.Component {
     status: ["To Do", "In Progress", "Completed"]
   };
 
+  constructor(props) {
+    super(props);
+    this.state.userEmail = this.props.dataFromParent;
+  }
+
   componentWillMount() {
+    this.getEmail();
     axios
       .get("http://localhost:5000/applicationDatabase")
       .then((res) => {
-        // const data = res.data;
-        this.setState({ applicationsToDo: res.data });
-        console.log(res);
-        console.log(res.data[0]["companyName"]);
         const toDo = res.data.filter(
-          (item) => item.applicationStatus == "To Do"
+          (item) => item.applicationStatus === "To Do"
         );
         const inProgress = res.data.filter(
-          (item) => item.applicationStatus == "In Progress"
+          (item) => item.applicationStatus === "In Progress"
         );
         const completed = res.data.filter(
-          (item) => item.applicationStatus == "Completed"
+          (item) => item.applicationStatus === "Completed"
         );
         this.setState({
           applicationsToDo: toDo,
@@ -43,22 +43,31 @@ class ApplicationLog extends React.Component {
         });
       })
       .catch(function (error) {
-        //Not handling the error. Just logging into the console.
         console.log(error);
       });
   }
 
-  constructor(props) {
-    super(props);
-    this.state.userID = 12345;
+  getEmail() {
+    console.log("getEmail post route");
+    axios
+      .post(
+        "http://localhost:5000/applicationDatabase/post/getEmail",
+        this.state
+      )
+      .then((res) => {
+        console.log(res);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
   }
 
   // DISTINGUISH COLUMNS BASED ON STATUS
 
   get_Applications = (i) => {
-    if (i == 0) return this.state.applicationsToDo;
-    if (i == 1) return this.state.applicationsInProgress;
-    if (i == 2) return this.state.applicationsCompleted;
+    if (i === 0) return this.state.applicationsToDo;
+    if (i === 1) return this.state.applicationsInProgress;
+    if (i === 2) return this.state.applicationsCompleted;
   };
 
   column = (i) => {
@@ -77,7 +86,7 @@ class ApplicationLog extends React.Component {
   render() {
     return (
       <div>
-        <AddButtonNavigationBar />
+        <AddButtonNavigationBar link={"/applications/add"} />
         <p className="App-intro">{this.state.apiResponse}</p>
         <Header page={this.state.page} />
         {this.column(0)}
@@ -94,19 +103,17 @@ class ApplicationStatusColumn extends React.Component {
     const { applications, status } = this.props;
 
     return (
-      <div className={styles.area}>
+      <Box className={styles.area}>
         <h3 className={styles.column_title}>{status}</h3>
         <ApplicationList
           applications={applications}
           handlePopup={this.props.handlePopup}
           modalOpen={this.props.modalOpen}
         />
-      </div>
+      </Box>
     );
   }
 }
-
-// class ApplicationStatusColumnInProgress extends React.Component {
 
 class ApplicationList extends React.Component {
   render() {
@@ -145,17 +152,40 @@ class ApplicationLogItem extends React.Component {
       })
       .then((res) => {
         console.log(res.data);
+        alert("Deleting item. Please refresh the page.");
       })
       .catch(function (error) {
-        //Not handling the error. Just logging into the console.
         console.log(error);
       });
-
-    // this.refresh();
   };
 
   handlePopup = () => {
     this.props.handlePopup(this.state.application);
+  };
+
+  viewCompany = () => {
+    if (this.state.application.companyName !== "")
+      return <h4>{this.state.application.companyName}</h4>;
+  };
+  viewPosition = () => {
+    if (this.state.application.position !== "")
+      return <h4>{this.state.application.position}</h4>;
+  };
+  viewJobPostingLink = () => {
+    if (this.state.application.jobPostingLink !== "")
+      return (
+        <div style={{ textDecoration: "underline" }}>
+          <a href={this.state.application.jobPostingLink}>View Job Posting</a>
+        </div>
+      );
+  };
+  viewResult = () => {
+    if (this.state.application.result !== "")
+      return <h5>{this.state.application.result}</h5>;
+  };
+  viewDeadline = () => {
+    if (this.state.application.deadline !== "")
+      return <h5>{this.state.application.deadline}</h5>;
   };
 
   render() {
@@ -164,24 +194,24 @@ class ApplicationLogItem extends React.Component {
 
     // check for undefined applications : this is the default when first rendering Application
     // in development mode, but is re-rendered when it gets to the componentWillMount() function
-    if (application != undefined) {
+    if (application !== undefined) {
       return (
-        <div className={styles.item} onClick={this.handlePopup}>
-          <h4> {application._id} </h4>
-          <h4> {application.companyName} </h4>
-          <h4> {application.position} </h4>
-          {/* <a href={application.jobPostingLink}>
-                  {" "}
-                  {application.jobPostingLink}{" "}
-               </a> */}
-          <h4>{application.result}</h4>
-          <h4> {application.deadline} </h4>
-          <button
-            type="submit"
-            onClick={this.handleDelete.bind(this, application)}
-          >
-            Delete
-          </button>
+        <div>
+          <div style={{ display: "flex", justifyContent: "flex-end" }}>
+            <button
+              className={styles.delete_button}
+              onClick={this.handleDelete.bind(this, application)}
+            >
+              Delete
+            </button>
+          </div>
+          <div className={styles.item} onClick={this.handlePopup}>
+            {this.viewCompany()}
+            {this.viewPosition()}
+            {this.viewJobPostingLink()}
+            {this.viewResult()}
+            {this.viewDeadline()}
+          </div>
         </div>
       );
     } else {
@@ -191,24 +221,6 @@ class ApplicationLogItem extends React.Component {
         </div>
       );
     }
-  }
-}
-
-class AddButton extends React.Component {
-  handleAdd = () => {
-    window.location.href = "localhost:3000/applications/add";
-  };
-
-  render() {
-    return (
-      <div>
-        <Link to={"/applications/add"}>
-          <button type="submit" onclick={this.handleAdd}>
-            +
-          </button>
-        </Link>
-      </div>
-    );
   }
 }
 

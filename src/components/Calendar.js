@@ -1,11 +1,9 @@
 import React from "react";
 import styles from "../assets/Styles.module.css";
-import "date-fns";
 import Grid from "@material-ui/core/Grid";
 import DateFnsUtils from "@date-io/date-fns";
 import {
   MuiPickersUtilsProvider,
-  KeyboardTimePicker,
   KeyboardDatePicker
 } from "@material-ui/pickers";
 
@@ -27,7 +25,7 @@ export default class Calendar extends React.Component {
 
   handleDateChange = (date) => {
     this.setSelectedDate(date);
-    this.sendData(date.toString());
+    this.sendData(date);
   };
 
   render() {
@@ -40,7 +38,7 @@ export default class Calendar extends React.Component {
               format="MM-dd-yyyy"
               margin="normal"
               id="date-picker"
-              label="Application Deadline"
+              label={this.props.label}
               value={this.props.selectedDate}
               onChange={this.handleDateChange}
               KeyboardButtonProps={{ "aria-label": "change date" }}

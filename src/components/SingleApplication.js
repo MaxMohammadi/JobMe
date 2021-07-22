@@ -5,30 +5,46 @@ import styles from "../assets/Styles.module.css";
 class SingleApplication extends React.Component {
   state = { application: {} };
 
+  viewCompany = () => {
+    if (this.state.application.companyName != "")
+      return <h4>{this.state.application.companyName}</h4>;
+  };
+  viewPosition = () => {
+    if (this.state.application.position != "")
+      return <h4>{this.state.application.position}</h4>;
+  };
   viewJobId = () => {
-    if (this.state.application.jobId != "")
+    if (this.state.application.jobId !== "")
       return <h3>{this.state.application.jobId}</h3>;
   };
   viewJobPostingLink = () => {
-    if (this.state.application.jobId != "")
+    if (this.state.application.jobPostingLink !== "")
       return (
-        <a href={this.state.application.jobPostingLink}>
-          {" "}
-          {this.state.application.jobPostingLink}{" "}
-        </a>
+        <div style={{ textDecoration: "underline" }}>
+          <a href={this.state.application.jobPostingLink}>View Job Posting</a>
+        </div>
       );
   };
   viewApplicationPortalLink = () => {
-    if (this.state.application.jobId != "")
+    if (this.state.application.applicationPortalLink !== "")
       return (
-        <a href={this.state.application.applicationPortalLink}>
-          {" "}
-          {this.state.application.applicationPortalLink}{" "}
-        </a>
+        <div style={{ textDecoration: "underline" }}>
+          <a href={this.state.application.applicationPortalLink}>
+            View Application Portal
+          </a>
+        </div>
       );
   };
+  viewResult = () => {
+    if (this.state.application.result != "")
+      return <h5>{this.state.application.result}</h5>;
+  };
+  viewDeadline = () => {
+    if (this.state.application.deadline != "")
+      return <h5>{this.state.application.deadline}</h5>;
+  };
   viewNotes = () => {
-    if (this.state.application.jobId != "")
+    if (this.state.application.notes !== "")
       return <h3>{this.state.application.notes}</h3>;
   };
 
@@ -39,6 +55,7 @@ class SingleApplication extends React.Component {
   render() {
     const { application } = this.props;
     this.state.application = application;
+
     console.log("here");
 
     if (!this.props.display) {
@@ -47,16 +64,23 @@ class SingleApplication extends React.Component {
 
     return (
       <div className={styles.popup}>
-        <button type="submit" onClick={this.handleClose}>
-          x
-        </button>
-        <h1>{application.companyName}</h1>
-        <h2>{application.position}</h2>
+        <div style={{ display: "flex", justifyContent: "flex-end" }}>
+          <button
+            className={styles.close_button}
+            style={{ marginLeft: "auto" }}
+            type="submit"
+            onClick={this.handleClose}
+          >
+            x
+          </button>
+        </div>
+        {this.viewCompany()}
+        {this.viewPosition()}
         {this.viewJobId()}
-        <h3>{application.deadline}</h3>
+        {this.viewDeadline()}
         {this.viewJobPostingLink()}
         {this.viewApplicationPortalLink()}
-        <h3>{application.result}</h3>
+        {this.viewResult()}
         {this.viewNotes()}
       </div>
     );
